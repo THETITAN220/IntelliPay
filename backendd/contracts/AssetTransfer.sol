@@ -1,15 +1,21 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
 contract AssetTransfer {
-    event Transfer(address indexed from, address indexed to, uint256 amount);
+    address public owner;
 
-    function transfer(address to) public payable {
-        require(msg.sender != to, "Sender and recipient cannot be the same");
-        require(msg.value > 0, "Transfer amount must be greater than 0");
-        (bool sent, ) = to.call{value: msg.value}("");
-        require(sent, "Failed to send Ether");
+    event TransferInitiated(address indexed from, address indexed to, uint256 amount);
 
-        emit Transfer(msg.sender, to, msg.value);
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function transferAsset(address payable to, uint256 amount) external payable {
+        require(msg.value == amount, "Insufficient amount sent");
+        require(to != address(0), "Invalid recipient address");
+
+        to.transfer(amount);
+
+        emit TransferInitiated(msg.sender, to, amount);
     }
 }
